@@ -10,7 +10,7 @@ public class Solution {
 
     public static void main(String[] args) {
 
-        Date d= new Date(500000) ;
+        Date d= new Date(5000000) ;
         Date d1= new Date(1000000) ;
 
 
@@ -29,11 +29,11 @@ public class Solution {
 
         CollegeStudent cst1 = new CollegeStudent("Tolya", "Karavaev", 5);
         CollegeStudent cst2 = new CollegeStudent("Gernenko", medium);
-        CollegeStudent cst3 = new CollegeStudent("NTU", 125,010000020124);
+        CollegeStudent cst3 = new CollegeStudent ("Grisha","Mashkin",4,prof,"NTU",1254,00100214552);
 
         SpecialStudent sp1 = new SpecialStudent("Kolya","Dub",1);
         SpecialStudent sp2 = new SpecialStudent("Gorenko", prof);
-        SpecialStudent sp3 = new SpecialStudent(123456789);
+        SpecialStudent sp4 = new SpecialStudent(123456789);
 
 
 
