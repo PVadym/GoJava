@@ -6,15 +6,15 @@ package Module3.HomeWork2;
 public class Main {
     public static void main(String[] args) {
 
-        Arithmetic arth1 = new Arithmetic();
-        Adder arth2 = new Adder();
+        Arithmetic arth = new Arithmetic();
+        Adder adder = new Adder();
 
         int a=5, b=7;
 
-        int res=arth1.add(a,b);
+        int res=adder.add(a,b);
         System.out.println(res);
 
-        boolean is = arth2.check(a,b);
+        boolean is = adder.check(a,b);
         System.out.println(is);
     }
 }

@@ -5,10 +5,7 @@ package Module3.HomeWork2;
  */
 public class Adder extends Arithmetic {
 
-    @Override
-    public int add(int a, int b) {
-        return super.add(a, b);
-    }
+
 
     public boolean check(int a, int b){
         if(a>=b) return true;
