@@ -1,7 +1,6 @@
 package Module81;
 
 import Module8.*;
-import Module8.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
 
-        AbstractDAOImp1<User> userDao = new UserDAO1<>();
+        AbstractDAOImp<User> userDao = new UserDAO<>();
 
         User user1 = new User(1007, "Kolya");
         User user2 = new User(1006, "Jora");
@@ -48,7 +47,7 @@ public class Main {
         userDao.deleteById(1007);
         System.out.println(userDao.getList());
 
-        System.out.println( (User) userDao.get(1004));
+        System.out.println( userDao.get(1004));
 
     }
 }

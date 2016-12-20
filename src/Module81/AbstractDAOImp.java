@@ -1,47 +1,49 @@
 package Module81;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Вадим on 12.12.2016.
  */
-public class AbstractDAOImp implements AbstractDAO {
+public abstract class AbstractDAOImp<T> implements AbstractDAO<T> {
 
-    List list;
-    @Override
-    public Object save(Object o) {
-        list.add(o);
-        return o;
+    List<T> list;
+
+    public AbstractDAOImp(){
+        list = new ArrayList<T>();
     }
 
     @Override
-    public void delete(Object o) {
-        list.remove(o);
+    public T save(T t) {
+        list.add(t);
+        return t;
+    }
+
+    @Override
+    public void delete(T t) {
+        list.remove(t);
 
     }
 
     @Override
-    public void deleteAll(List list) {
+    public void deleteAll(List<T> list) {
         this.list.removeAll(list);
     }
 
     @Override
-    public void saveAll(List list) {
+    public void saveAll(List<T> list) {
         this.list.addAll(list);
     }
 
     @Override
-    public List getList() {
+    public List<T> getList() {
         return this.list;
     }
 
     @Override
-    public void deleteById(long id) {
-
-    }
+    public abstract  void deleteById(long id);
 
     @Override
-    public Object get(long id) {
-        return null;
-    }
+    public abstract T get(long id);
 }
