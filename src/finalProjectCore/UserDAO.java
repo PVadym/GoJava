@@ -70,6 +70,7 @@ public class UserDAO implements DAO<User> {
         return userDAO;
     }
     //метод добавляет в список и в txt документ
+    //проверить на одинаковый ID!!!!
     @Override
     public boolean add(User user) {
         if (usersBase.contains(user)) {
@@ -91,6 +92,8 @@ public class UserDAO implements DAO<User> {
     @Override
     public boolean edit(User user) {
         return false;
+
+        //использовать сетеры
     }
 
 

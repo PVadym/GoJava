@@ -5,14 +5,16 @@ public class Room {
     private int price;
     private int persons;
     private Hotel hotel;
-    private User userReserved;
+    private User userReserved=null;
 
     public Room(long id, int price, int persons, Hotel hotel) {
         this.id = id;
         this.price = price;
         this.persons = persons;
         this.hotel = hotel;
+
     }
+
 
     public long getId() {
         return id;

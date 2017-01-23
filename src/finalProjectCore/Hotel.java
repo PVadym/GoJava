@@ -5,12 +5,14 @@ import finalProjectCore.Room;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Hotel {
     private long id;
     private String name;
     private String city;
-    private List<Room> rooms = new ArrayList<>();
+    private List<Room> rooms = new RoomDAO().getRoomList().stream()
+            .filter(room -> room.getHotel().getId()==this.getId()).collect(Collectors.toList());
 
     public Hotel(long id, String name, String city) {
         this.id = id;
@@ -78,5 +80,7 @@ public class Hotel {
         result = 31 * result + rooms.hashCode();
         return result;
     }
+
+
 }
 
