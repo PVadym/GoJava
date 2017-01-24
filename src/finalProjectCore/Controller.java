@@ -19,7 +19,7 @@ public class Controller {
 
     //21-01-2017 немного изменил метод
     public static boolean registerUser(User userToRegister) {
-        if (userDAO.getUsersBase().stream().anyMatch(userFromBase -> userFromBase.getId() == userToRegister.getId()))
+        if (userDAO.getBase().stream().anyMatch(userFromBase -> userFromBase.getId() == userToRegister.getId()))
             return true;
         else {
 
@@ -50,7 +50,7 @@ public class Controller {
 
     public static void bookRoom(long roomId, long userId, long hotelId) {
         try {
-            User userToRegister = userDAO.getUsersBase().stream()
+            User userToRegister = userDAO.getBase().stream()
                     .filter(user -> user.getId() == userId)
                     .findAny()
                     .get();
@@ -90,7 +90,7 @@ public class Controller {
 
     public static void cancelReservation(long roomId, long userId, long hotelId) {
         try {
-            User userToRegister = userDAO.getUsersBase().stream()
+            User userToRegister = userDAO.getBase().stream()
                     .filter(user -> user.getId() == userId)
                     .findAny()
                     .get();

@@ -12,9 +12,15 @@ public class Room {
         this.price = price;
         this.persons = persons;
         this.hotel = hotel;
-
     }
 
+    public Room(long id, int price, int persons, Hotel hotel, User userReserved) {
+        this.id = id;
+        this.price = price;
+        this.persons = persons;
+        this.hotel = hotel;
+        this.userReserved = userReserved;
+    }
 
     public long getId() {
         return id;
@@ -56,6 +62,8 @@ public class Room {
         this.userReserved = userReserved;
     }
 
+//
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,8 +74,7 @@ public class Room {
         if (id != room.id) return false;
         if (price != room.price) return false;
         if (persons != room.persons) return false;
-        if (!hotel.equals(room.hotel)) return false;
-        return userReserved != null ? userReserved.equals(room.userReserved) : room.userReserved == null;
+        return hotel.equals(room.hotel);
 
     }
 
@@ -76,7 +83,7 @@ public class Room {
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + price;
         result = 31 * result + persons;
-        result = 31 * result + (userReserved != null ? userReserved.hashCode() : 0);
+        result = 31 * result + hotel.hashCode();
         return result;
     }
 

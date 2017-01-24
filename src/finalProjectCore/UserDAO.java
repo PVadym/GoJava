@@ -3,26 +3,38 @@ package finalProjectCore;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class UserDAO implements DAO<User> {
     private static UserDAO userDAO;
     private List<User> usersBase = new ArrayList<>();
+    private File file;
 
+
+    //Singleton
+    public static UserDAO getUserDAO (){
+        if (userDAO == null) userDAO = new UserDAO();
+        return userDAO;
+    }
 
 
     private UserDAO() {
-        // если пустая, то  будет сообщение - "База пуста!"
-        try(BufferedReader br = new BufferedReader(new FileReader("src/finalProjectCore/userBase.txt"))) {
-            if (br.readLine()==null)System.out.println("База пуста!");
+        //создаем файл для хранения пользователей
+        try {
+            file = new File("src/finalProjectCore/userBase.txt");
+            if(file.createNewFile()) System.out.println("Файл базы создан!");
+        } catch (IOException e) {
+            System.out.println("Не далось создать базу!");
+        }
 
+        // формируем коллекцию пользователей из файла при создании єкз. UserDAO()
 
+        try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+            if (br.readLine()==null)
+                System.out.println("База пуста!");
             else {
-                Stream<String> streamFromFiles = Files.lines(Paths.get("src/finalProjectCore/userBase.txt"));
+                Stream<String> streamFromFiles = Files.lines(Paths.get(file.getAbsolutePath()));
                 streamFromFiles.forEach(line -> {
                 String fields[] = line.split(" ");
 
@@ -36,50 +48,45 @@ public class UserDAO implements DAO<User> {
 
 
     }
-    private void userBaseWriter(User user){ // сделал приватным
-        try (BufferedWriter bufferedWriter = new BufferedWriter(
-                    new OutputStreamWriter(
-                            new FileOutputStream("src/finalProjectCore/userBase.txt",true), "utf-8"))){
-            bufferedWriter.write(String.valueOf(user.getId())+" ");
-            bufferedWriter.write(user.getName()+" ");
-            bufferedWriter.write(user.getPassword()+System.lineSeparator());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-    }
-    private void userBaseDeleter(User user){ // сделал приватным
-        try (BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader((
-                        new FileInputStream("src/finalProjectCore/userBase.txt"))));
-             BufferedWriter bufferedWriter = new BufferedWriter(
-                     new OutputStreamWriter(
-                             new FileOutputStream("src/finalProjectCore/userBase.txt")))){
-            for (int i = 0; i <usersBase.size(); i++){
-                String line = bufferedReader.readLine();
-                bufferedWriter.write(line);
+    // метод заносит информацию в файл txt
+    @Override
+    public boolean writerToFile(File file, List<User> list){
+        try (BufferedWriter bufferedWriter = new BufferedWriter(
+                new OutputStreamWriter(
+                        new FileOutputStream(file)))){
+            for (User user : list) {
+
+                bufferedWriter.write(String.valueOf(user.getId())+" ");
+                bufferedWriter.write(user.getName()+" ");
+                bufferedWriter.write(user.getPassword()+System.lineSeparator());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Не удалось сохранить данные в базу!");
+            return false;
         }
-
+        return true;
     }
 
-    public static UserDAO getUserDAO (){
-        if (userDAO == null) userDAO = new UserDAO();
-        return userDAO;
-    }
-    //метод добавляет в список и в txt документ
-    //проверить на одинаковый ID!!!!
+
     @Override
     public boolean add(User user) {
-        if (usersBase.contains(user)) {
-            System.out.println("Пользователь уже существует!");
-            return false;
-        } else {
+
+
             try {
-                userBaseWriter(user); //внес метод добавление в базу
-                usersBase.add(user);
+                if ((user.getName() == null || user.getName().equals("")) ||
+                        (user.getPassword() == null || user.getPassword().equals(""))) {
+                    System.out.println("Поле имя и пароль должны быть заполнены!");
+                    return false;}
+                else {
+                    if (usersBase.stream().anyMatch(u -> u.getId() == user.getId())) {
+                        System.out.println("Пользователь уже существует!");
+                        return false;
+                    } else {
+                        usersBase.add(user);
+                        writerToFile(file, usersBase);
+                    }
+                }
             } catch (NullPointerException e) {
                 System.out.println("Внесите корректную информацию о новом пользователе!");
                 return false;
@@ -87,23 +94,43 @@ public class UserDAO implements DAO<User> {
 
             return true;
         }
-    }
+
+
 
     @Override
     public boolean edit(User user) {
-        return false;
 
-        //использовать сетеры
+        try {
+            User userToEdit = usersBase.stream()
+                    .filter(user1 -> user1.getId() == user.getId())
+                    .findAny()
+                    .get();
+            if ((user.getName() == null || user.getName().equals("")) ||
+                    (user.getPassword() == null || user.getPassword().equals(""))) {
+                System.out.println("Поле имя и пароль должны быть заполнены!");
+                return false;
+            } else {
+                remove(userToEdit);
+                add(user);
+            }
+        } catch (NoSuchElementException e) {
+            System.out.printf("Пользователя с ID %d нет в базе." + "\n", user.getId());
+            return false;
+        } catch (NullPointerException e){
+            System.out.println("Внесите корректную информацию о пользователе!");
+            return false;
+        }
+        return true;
     }
 
 
-// метод удаляет из списка и из txt документа
+
     @Override
     public boolean remove(User user) {
         if (usersBase.contains(user)) {
             try{
             usersBase.remove(user);
-            userBaseDeleter(user);
+            writerToFile(file,usersBase);
             return true;
 
         } catch (NullPointerException e){
@@ -114,7 +141,8 @@ public class UserDAO implements DAO<User> {
         return false;
     }
 
-    public List<User> getUsersBase() {
+    @Override
+    public List<User> getBase() {
         return usersBase;
     }
 
