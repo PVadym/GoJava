@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 /**
@@ -18,6 +19,12 @@ public class HotelDAO implements DAO<Hotel> {
     private File file;
 
 
+    public static HotelDAO getHotelDAO (){
+        if (hotelDAO == null) hotelDAO = new HotelDAO();
+        return hotelDAO;
+    }
+
+
     private HotelDAO() {
         //создаем файл для хранения отелей
         try {
@@ -26,7 +33,10 @@ public class HotelDAO implements DAO<Hotel> {
         } catch (IOException e) {
             System.out.println("Не далось создать базу!");
         }
-        try {
+        try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+            if (br.readLine() == null)
+                System.out.println("База отелей пуста!");
+            else {
             Stream<String> streamFromFiles = Files.lines(Paths.get(file.getAbsolutePath()));
             streamFromFiles.forEach(line -> {
                 String fields[] = line.split("@");
@@ -35,73 +45,126 @@ public class HotelDAO implements DAO<Hotel> {
                 hotelList.add(new Hotel(Long.parseLong(fields[0]), fields[1], fields[2]));
 
             });
-            streamFromFiles.close();
+            streamFromFiles.close();}
         } catch (IOException | NumberFormatException e) {
             throw new RuntimeException("База отелей повреждена");
         }
 
     }
 
-    public static HotelDAO getHotelDAO (){
-        if (hotelDAO == null) hotelDAO = new HotelDAO();
-        return hotelDAO;
-    }
+
 
 
     @Override
     public boolean add(Hotel hotel) {
 
-        if (hotelList.stream().anyMatch(hotelFromBase -> hotelFromBase.getId() == hotel.getId())) return false;
-        hotelList.add(hotel);
-        writerToFile(file,hotelList);
+        try {
+            if (validInspect(hotel)) {
+                System.out.println("Поле ID, название отеля и город должны быть заполнены!");
+                return false;}
+            else {
+                if (hotelList.stream().anyMatch(hotelFromBase -> hotelFromBase.getId() == hotel.getId()))  {
+                    System.out.println("Отель с таким ID уже существует!");
+                    return false;
+                } else {
+                    hotelList.add(hotel);
+                    writerToFile(file,hotelList);
+                }
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Внесите корректную информацию о новой комнате!");
+            return false;
+        }
         return true;
     }
 
+
     @Override
     public boolean edit(Hotel hotel) {
-        Hotel oldHotel;
-        if (!hotelList.contains(hotel)){
-            System.out.println("Отель не найден");
-            return false; }
-        oldHotel = hotelDAO.getBase().stream().filter(hotel1 -> hotel1.getId() == hotel.getId()).findAny().get();
-        oldHotel.setCity(hotel.getCity());
-        oldHotel.setName(hotel.getName());
-        writerToFile(file, hotelList);
 
-//        add(ho);
-//        RoomDAO roomDAO = RoomDAO.getRoomDAO();
-//        for (int i = 0; i < roomDAO.getRoomList().size(); i++) {
-//            if (roomDAO.getRoomList().get(i).getHotel().equals(oldHotel)) {
-//                roomDAO.edit(roomDAO.getRoomList().get(i), new Room(roomDAO.getRoomList().get(i).getId(),
-//                        roomDAO.getRoomList().get(i).getPrice(), roomDAO.getRoomList().get(i).getPersons(), ho));
-//            }
-//        }
-//        remove(oldHotel);
-//
+
+        try {
+            if (validInspect(hotel)) {
+                System.out.println("Поле ID, название отеля и город должны быть заполнены!");
+                return false;
+            } else {
+            Hotel oldHotel = hotelDAO.getBase().stream()
+                    .filter(hotel1 -> hotel1.getId() == hotel.getId())
+                    .findAny()
+                    .get();
+
+                oldHotel.setCity(hotel.getCity());
+                oldHotel.setName(hotel.getName());
+                writerToFile(file, hotelList);
+            }
+        } catch (NoSuchElementException e) {
+            System.out.printf("Отель с ID %d нет в базе." + "\n", hotel.getId());
+            return false;
+        } catch (NullPointerException e){
+            System.out.println("Внесите корректную информацию об отеле!");
+            return false;
+        }
         return true;
     }
 
     @Override
     public boolean remove(Hotel hotel) {
-        if (!hotelList.contains(hotel)){
-            System.out.println("Отель не найден");
-            return false; }
+        if (!hotelList.contains(hotel)) {
+            System.out.println("Такого отеля нет в базе данных!");
+            return false;
+        }else{
+            try {
+                if (hotelList.stream()
+                        .anyMatch(h -> h.getId() == hotel.getId())) {
 
-        RoomDAO roomDAO = RoomDAO.getRoomDAO();
-        for (int i = 0; i < roomDAO.getBase().size(); i++) {
-            if (roomDAO.getBase().get(i).getHotel().equals(hotel)) {
-                roomDAO.remove(roomDAO.getBase().get(i));
+                    RoomDAO roomDAO = RoomDAO.getRoomDAO();
+//                    roomDAO.getBase().stream().filter(room -> room.getHotel().getId()==hotel.getId()).
+//                            ifPresent(roomDAO.remove());
+                    for (int i = roomDAO.getBase().size()-1; i >=0 ; i--) {
+                        if (roomDAO.getBase().get(i).getHotel().getId()==hotel.getId()) {
+                            roomDAO.remove(roomDAO.getBase().get(i));
+                        }
+                    }
+                    hotelList.remove(hotel);
+                    writerToFile(file, hotelList);
+                }
+            } catch (NullPointerException e) {
+                System.out.println("База пуста или такого отеля нет в базе данных!");
+                return false;
             }
+            return true;
         }
-        hotelList.remove(hotel);
-        writerToFile(file,hotelList);
-        return true;
+
+
+
+//
+//        if (!hotelList.contains(hotel)){
+//            System.out.println("Отель не найден");
+//            return false; }
+//
+//        RoomDAO roomDAO = RoomDAO.getRoomDAO();
+//        for (int i = 0; i < roomDAO.getBase().size(); i++) {
+//            if (roomDAO.getBase().get(i).getHotel().equals(hotel)) {
+//                roomDAO.remove(roomDAO.getBase().get(i));
+//            }
+//        }
+//        hotelList.remove(hotel);
+//        writerToFile(file,hotelList);
+//        return true;
+
+    }
+    // проверка на валидность
+    private boolean validInspect (Hotel hotel){
+        boolean notValid = false;
+        if ((hotel.getId() == 0) || (hotel.getCity()==null||hotel.getCity().equals("")) ||
+                (hotel.getName()==null||hotel.getName().equals("")))
+            notValid = true;
+        return notValid;
     }
 
 
 
-    @Override
-    public boolean writerToFile (File file, List<Hotel> list){
+    private boolean writerToFile (File file, List<Hotel> list){
         StringBuilder stringBuilder = new StringBuilder();
         list.stream().forEach(hotelFromList -> stringBuilder.append(hotelFromList.getId() + "@"
                 + hotelFromList.getName() + "@" + hotelFromList.getCity() + "\n"));

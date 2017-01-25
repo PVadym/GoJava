@@ -20,8 +20,7 @@ public class Hotel {
         this.id = id;
         this.name = name;
         this.city = city;
-  //      rooms = RoomDAO.getRoomDAO().getBase().stream()
-   //             .filter(room -> room.getHotel().getId()==this.getId()).collect(Collectors.toList());
+
     }
 
     public long getId() {
@@ -30,11 +29,6 @@ public class Hotel {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public boolean add (Room room){
-        rooms.add(room);
-        return true;
     }
 
     public String getName() {
@@ -54,7 +48,8 @@ public class Hotel {
     }
 
     public List<Room> getRooms() {
-        return rooms;
+        return rooms = RoomDAO.getRoomDAO().getBase().stream()
+                .filter(room -> room.getHotel().getId()==this.getId()).collect(Collectors.toList());
     }
 
     public void setRooms(List<Room> rooms) {

@@ -69,7 +69,7 @@ public class Controller {
                         if (roomToReservation.getUserReserved() == null) {
                             roomToReservation.setUserReserved(userToRegister);
                             System.out.printf("Комната %s забронирована пользователем %s.\n", roomToReservation.toString(), userToRegister.toString());
-
+                            RoomDAO.getRoomDAO().edit(roomToReservation);
                         } else
                             System.out.println("Комната недоступна для бронирования!");
 
@@ -84,8 +84,8 @@ public class Controller {
         } catch (NoSuchElementException e) {
             System.out.printf("Пользователя с ID %d нет базе. Просим зарегистрироваться!\n", userId);
 
-
         }
+
     }
 
     public static void cancelReservation(long roomId, long userId, long hotelId) {
@@ -109,7 +109,7 @@ public class Controller {
                     if (roomToReservation.getUserReserved() != null) {
                         roomToReservation.setUserReserved(null);
                         System.out.printf("Резерв пользователя %s с комнаты %s снят.\n", userToRegister.toString(),roomToReservation.toString());
-
+                        RoomDAO.getRoomDAO().edit(roomToReservation);
                     } else
                         System.out.println("Комната доступна для бронирования.");
 

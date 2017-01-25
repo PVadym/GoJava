@@ -35,38 +35,42 @@ public class RoomDAO implements DAO<Room> {
 
         HotelDAO hotelDAO = HotelDAO.getHotelDAO();
         UserDAO userDAO = UserDAO.getUserDAO();
-        try {
-            Stream<String> streamFromFiles = Files.lines(Paths.get(file.getAbsolutePath()));
-            streamFromFiles.forEach(line -> {
-                String fields[] = line.split("@");
-                if (roomList.stream().anyMatch(room -> room.getId() == Long.parseLong(fields[0])))
-                    throw new RuntimeException("База комнат повреждена");
-                if (fields.length != 5 && fields.length != 4) throw new RuntimeException("База комнат повреждена");
-                Hotel hotel = null;
-                User user = null;
-                for (int i = 0; i < hotelDAO.getBase().size(); i++) {
-                    if (hotelDAO.getBase().get(i).getId() == Long.parseLong(fields[3])) {
-                        hotel = hotelDAO.getBase().get(i);
-                        break;
-                    }
-                }
-                if (fields.length == 5) {
-                    for (int i = 0; i < userDAO.getBase().size(); i++) {
-                        if (userDAO.getBase().get(i).getId() == Long.parseLong(fields[4])) {
-                            user = userDAO.getBase().get(i);
+
+        try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+            if (br.readLine() == null)
+                System.out.println("База пуста комнат!");
+            else {
+
+                Stream<String> streamFromFiles = Files.lines(Paths.get(file.getAbsolutePath()));
+                streamFromFiles.forEach(line -> {
+                    String fields[] = line.split("@");
+                    if (roomList.stream().anyMatch(room -> room.getId() == Long.parseLong(fields[0])))
+                        throw new RuntimeException("База комнат повреждена");
+                    if (fields.length != 5 && fields.length != 4) throw new RuntimeException("База комнат повреждена");
+                    Hotel hotel = null;
+                    User user = null;
+                    for (int i = 0; i < hotelDAO.getBase().size(); i++) {
+                        if (hotelDAO.getBase().get(i).getId() == Long.parseLong(fields[3])) {
+                            hotel = hotelDAO.getBase().get(i);
                             break;
                         }
                     }
-                }
-
-                if (hotel != null) {
-                    roomList.add(new Room(Long.parseLong(fields[0]), Integer.parseInt(fields[1]), Integer.parseInt(fields[2]), hotel, user));
-                }
-            });
-
-            streamFromFiles.close();
+                    if (fields.length == 5) {
+                        for (int i = 0; i < userDAO.getBase().size(); i++) {
+                            if (userDAO.getBase().get(i).getId() == Long.parseLong(fields[4])) {
+                                user = userDAO.getBase().get(i);
+                                break;
+                            }
+                        }
+                    }
+                    if (hotel != null) {
+                        roomList.add(new Room(Long.parseLong(fields[0]), Integer.parseInt(fields[1]), Integer.parseInt(fields[2]), hotel, user));
+                    }
+                });
+                streamFromFiles.close();
+            }
         } catch (IOException | NumberFormatException e) {
-            throw new RuntimeException("База юзеров повреждена");
+            throw new RuntimeException("База комнат повреждена!");
         }
     }
 
@@ -74,8 +78,7 @@ public class RoomDAO implements DAO<Room> {
     @Override
     public boolean add(Room room) {
         try {
-            if ((room.getId() == 0) || (room.getPersons()==0) ||
-                    (room.getHotel()==null)) {
+            if (validInspect(room)) {
                 System.out.println("Поле ID, количество мест и отель должны быть заполнены!");
                 return false;}
             else {
@@ -103,8 +106,7 @@ public class RoomDAO implements DAO<Room> {
                     .filter(r -> r.getId() == room.getId())
                     .findAny()
                     .get();
-            if ((room.getId() == 0) || (room.getPersons() == 0) ||
-                    (room.getHotel() == null)) {
+            if (validInspect(room)) {
                 System.out.println("Поле ID, количество мест и отель должны быть заполнены!");
                 return false;
             } else {
@@ -112,7 +114,7 @@ public class RoomDAO implements DAO<Room> {
                 add(room);
             }
         } catch (NoSuchElementException e) {
-            System.out.printf("Пользователя с ID %d нет в базе." + "\n", room.getId());
+            System.out.printf("Комнаты с ID %d нет в базе." + "\n", room.getId());
             return false;
         } catch (NullPointerException e){
             System.out.println("Внесите корректную информацию о комнате!");
@@ -126,39 +128,47 @@ public class RoomDAO implements DAO<Room> {
     @Override
     public boolean remove(Room room) {
 
-            try{
-                if(roomList.stream()
-                        .anyMatch(room1 -> room1.getId()==room.getId())){
+        if (!roomList.contains(room)) {
+            System.out.println("Такой комнаты нет в базе данных!");
+            return false;
+        } else {
+            try {
+                if (roomList.stream()
+                        .anyMatch(room1 -> room1.getId() == room.getId())) {
                     roomList.remove(room);
-                    writerToFile(file,roomList);
+                    writerToFile(file, roomList);
                 }
-                else{
-                    System.out.println("Такой комнаты нет в базе данных!");
-                    return false;
-                }
-            } catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 System.out.println("База пуста или такой комнаты нет в базе данных!");
                 return false;
             }
-        return true;
+            return true;
+        }
     }
 
-    @Override
-    public boolean writerToFile(File file, List<Room> list) {
-        StringBuilder stringBuilder = new StringBuilder();
-        StringBuilder stringBuilder1 = new StringBuilder();
+    private boolean validInspect (Room room){
+        boolean notValid = false;
+        if ((room.getId() == 0) || (room.getPersons() == 0) ||
+                (room.getHotel() == null))
+            notValid = true;
+        return notValid;
+    }
 
-        list.stream().filter(room -> room.getUserReserved()!=null).forEach(roomFromList -> stringBuilder.append(roomFromList.getId() + "@"
-                + roomFromList.getPrice() + "@" + roomFromList.getPersons() +"@"
-                + roomFromList.getHotel().getId() + "@"+roomFromList.getUserReserved().getId()+"\n"));
 
-        list.stream().filter(room -> room.getUserReserved()==null).forEach(roomFromList -> stringBuilder1.append(roomFromList.getId() + "@"
-                + roomFromList.getPrice() + "@" + roomFromList.getPersons() +"@"
-                + roomFromList.getHotel().getId() + "\n"));
+    private boolean writerToFile(File file, List<Room> list) {
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))){
-            bufferedWriter.append(stringBuilder);
-            bufferedWriter.append(stringBuilder1);
+            for (Room room : list) {
+
+                bufferedWriter.write(room.getId()+"@");
+                bufferedWriter.write(room.getPrice()+"@");
+                bufferedWriter.write(room.getPersons()+"@");
+                bufferedWriter.write(String.valueOf(room.getHotel().getId()));
+                if (room.getUserReserved()!=null){
+                    bufferedWriter.write("@"+room.getUserReserved().getId());
+                }
+                bufferedWriter.write(System.lineSeparator());
+            }
 
             bufferedWriter.flush();
 
@@ -169,7 +179,6 @@ public class RoomDAO implements DAO<Room> {
         return true;
 
     }
-
 
     @Override
     public List<Room> getBase() {

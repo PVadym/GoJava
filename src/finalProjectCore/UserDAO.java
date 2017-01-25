@@ -29,10 +29,9 @@ public class UserDAO implements DAO<User> {
         }
 
         // формируем коллекцию пользователей из файла при создании єкз. UserDAO()
-
         try(BufferedReader br = new BufferedReader(new FileReader(file))) {
             if (br.readLine()==null)
-                System.out.println("База пуста!");
+                System.out.println("База пользователей пуста!");
             else {
                 Stream<String> streamFromFiles = Files.lines(Paths.get(file.getAbsolutePath()));
                 streamFromFiles.forEach(line -> {
@@ -42,22 +41,20 @@ public class UserDAO implements DAO<User> {
                 usersBase.add(new User(Long.parseLong(fields[0]), fields[1], fields[2]));
             });}
         } catch (IOException | NumberFormatException e) {
-            throw new RuntimeException("База юзеров повреждена");
+            throw new RuntimeException("База юзеров повреждена!");
 
         }
-
 
     }
 
     // метод заносит информацию в файл txt
-    @Override
-    public boolean writerToFile(File file, List<User> list){
+    private boolean writerToFile(File file, List<User> list){
         try (BufferedWriter bufferedWriter = new BufferedWriter(
                 new OutputStreamWriter(
                         new FileOutputStream(file)))){
             for (User user : list) {
 
-                bufferedWriter.write(String.valueOf(user.getId())+" ");
+                bufferedWriter.write(user.getId()+" ");
                 bufferedWriter.write(user.getName()+" ");
                 bufferedWriter.write(user.getPassword()+System.lineSeparator());
             }
@@ -68,14 +65,20 @@ public class UserDAO implements DAO<User> {
         return true;
     }
 
+    // проверка на вилидность данных
+    private boolean validInspect (User user){
+        boolean notValid = false;
+        if ((user.getName() == null || user.getName().equals("")) ||
+                (user.getPassword() == null || user.getPassword().equals("")))
+            notValid = true;
+        return notValid;
+    }
+
 
     @Override
     public boolean add(User user) {
-
-
             try {
-                if ((user.getName() == null || user.getName().equals("")) ||
-                        (user.getPassword() == null || user.getPassword().equals(""))) {
+                if (validInspect(user)) {
                     System.out.println("Поле имя и пароль должны быть заполнены!");
                     return false;}
                 else {
@@ -105,8 +108,7 @@ public class UserDAO implements DAO<User> {
                     .filter(user1 -> user1.getId() == user.getId())
                     .findAny()
                     .get();
-            if ((user.getName() == null || user.getName().equals("")) ||
-                    (user.getPassword() == null || user.getPassword().equals(""))) {
+            if (validInspect(user)) {
                 System.out.println("Поле имя и пароль должны быть заполнены!");
                 return false;
             } else {
