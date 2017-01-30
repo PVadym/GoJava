@@ -75,7 +75,6 @@ public class Room {
         if (price != room.price) return false;
         if (persons != room.persons) return false;
         return hotel.equals(room.hotel);
-
     }
 
     @Override
@@ -94,7 +93,6 @@ public class Room {
                 ", price=" + price +
                 ", persons=" + persons +
                 ", hotel=" + hotel +
-                ", userReserved=" + userReserved +
                 '}';
     }
 }

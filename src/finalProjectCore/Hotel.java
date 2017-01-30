@@ -1,9 +1,5 @@
 package finalProjectCore;
 
-/**
- * Created by Вадим on 24.01.2017.
- */
-
         import finalProjectCore.Room;
         import java.util.ArrayList;
         import java.util.List;
@@ -16,11 +12,9 @@ public class Hotel {
     private List<Room> rooms;
 
     public Hotel(long id, String name, String city) {
-
         this.id = id;
         this.name = name;
         this.city = city;
-
     }
 
     public long getId() {
@@ -56,7 +50,6 @@ public class Hotel {
         this.rooms = rooms;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -67,7 +60,6 @@ public class Hotel {
         if (id != hotel.id) return false;
         if (!name.equals(hotel.name)) return false;
         return city.equals(hotel.city);
-
     }
 
     @Override

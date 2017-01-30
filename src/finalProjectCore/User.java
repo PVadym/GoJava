@@ -15,12 +15,24 @@ public class User {
         return id;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
@@ -28,7 +40,6 @@ public class User {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", password='" + password + '\'' +
                 '}';
     }
 
@@ -42,7 +53,6 @@ public class User {
         if (id != user.id) return false;
         if (!name.equals(user.name)) return false;
         return password.equals(user.password);
-
     }
 
     @Override

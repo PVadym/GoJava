@@ -1,131 +1,283 @@
 package finalProjectCore;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static finalProjectCore.Controller.*;
+
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        first:
+        while (true) {
+            System.out.println("1- поиск номеров, 2- поиск отеля по названию, 3- поиск отеля по городу, \n" +
+                    "Авторизируйтесь для бронирования: 4- войти, 5- зарегистрироваться. 0- завершить работу");
+            String choice1 = bufferedReader.readLine();
 
+            if (choice1.equals("0")) break;
 
-//        System.out.println(Controller.registerUser(new User(100000, "DDD")));
-//        System.out.println(Controller.registerUser(new User(99999, "DDD")));
-        UserDAO userDAO = UserDAO.getUserDAO();
-        userDAO.getBase().stream().forEach(System.out::println);
+            if (choice1.equals("1")){
+                while (true) {
+                    System.out.println("Для поиска номеров, введите параметры разделяя их символом / в таком формате:" +
+                            " город/название отеля/кол-во персон/цена от/цена до, образец: Kiev/Desna/2/200/350 \n" +
+                            "если параметр Вам не важен - поставьте вместо него символ *.   А если передумали искать, то: " +
+                            " 9- главное меню; 0- завершить работу");
+                    String choice4 = bufferedReader.readLine();
+                    if (choice4.equals("0")) break first;
+                    if (choice4.equals("9")) continue first;
+                    String s[] = choice4.split("/");
+                    if (s.length !=5) {System.out.println("Некорректный ввод!"); continue;}
+                    Map<String,String> map = new HashMap<>();
+                    map.put(CITY, s[0].trim());
+                    map.put(HOTEL_NAME, s[1].trim());
+                    map.put(PERSONS, s[2].trim());
+                    map.put(MIN_PRICE, s[3].trim());
+                    map.put(MAX_PRICE, s[4].trim());
+                    List<Room> rooms = Controller.findRoom(map);
+                    if (rooms.size() == 0) System.out.println("Ничего не найдено. Возможно параметры поиска слишком строгие.");
+                    rooms.forEach(System.out::println);
+                    System.out.println("Авторизируйтесь в главном меню для бронирования. \nПовторить поиск?");
+                }
+            }
 
+            if (choice1.equals("2")) {
+                while (true){
+                    System.out.println("Введите название отеля, или его часть;" +
+                            " получить весь список отелей- просто нажмите Enter; 9- предыдущее меню; 0- завершить работу");
+                    String choice4 = bufferedReader.readLine();
+                    if (choice4.equals("0")) break first;
+                    if (choice4.equals("9")) continue first;
+                    Controller.findHotelByName(choice4.trim()).forEach(System.out::println);
+                    System.out.println("Продолжить поиск?");
+                }
+            }
+            /*поиск отеля по городу*/
+            if (choice1.equals("3")) {
+                while (true) {
+                    System.out.println("Введите название города, или его часть;" +
+                            " получить весь список отелей- просто нажмите Enter; 9- предыдущее меню; 0- завершить работу");
+                    String choice2 = bufferedReader.readLine();
+                    if (choice2.equals("0")) break first;
+                    if (choice2.equals("9")) continue first;
+                    Controller.findHotelByCity(choice2.trim()).forEach(System.out::println);
+                    System.out.println("Продолжить поиск?");
 
-        userDAO.add(new User(1024,"Fhjk","vbnm"));
-        User Gerg = new User(154,"Gerg","454");
-        System.out.println("_________________________________");
-        System.out.println(userDAO.getBase().contains(Gerg));
-       userDAO.add(Gerg);
-       userDAO.add(Gerg);
-        userDAO.remove(Gerg);
-        userDAO.edit(new User(554544, "", "kiu"));
-       //userDAO.add();
-        User user = new User(2641,"hfgjh","gh");
-        userDAO.add(user);
-        userDAO.remove(Gerg);
+                }
+            }
 
+            //Вход
+            if (choice1.equals("4")) {
+                User user;
+                while (true){
+                    System.out.println("Вход. Введите имя и пароль через разделитель /, например Vova/12345 ; либо: 1- выйти в главное меню, 0- завершить работу");
+                    String choice2 = bufferedReader.readLine();
+                    if (choice2.equals("root/777")){
+                        Admin.root();
+                        continue first;
+                    }
+                    if (choice2.length() == 1) {
+                        if (choice2.equals("0")) break first;
+                        if (choice2.equals("1")) continue first;
+                    }
+                    String nameAndPass[] = choice2.split("/");
+                    if (nameAndPass.length != 2) {
+                        System.out.println("Некорректный ввод");
+                        continue;
+                    }
+                    user = Controller.enter(nameAndPass[0].toLowerCase().trim(), nameAndPass[1].trim());
 
+                    //юзер вошел под своим именем
+                    if (user != null) {
+                        third:
+                        while (true){
+                            System.out.println("\n1- поиск номеров/бронирование, 2- поиск отеля по названию, 3- поиск отеля по городу," +
+                                    "\n5- список забронированных Вами номеров/снятие брони," +
+                                    "\n7- редактировать имя/пароль, 9- выход из учетной записи, 0- завершить работу");
+                            String choice3 = bufferedReader.readLine();
+                            if (choice3.equals("0")) break first;
+                            if (choice3.equals("9")) { user = null; continue first;}
 
-        User u = new User(15454, "fghj", "vb");
-        userDAO.add(u);
-        userDAO.add(new User(15454, "svf", "vb"));
-        System.out.println(userDAO.edit(new User(15454, "fgh", "!!!")));
-        //  userDAO.remove(Gerg);
-        userDAO.remove(u);
-        userDAO.getBase().stream().forEach(System.out::println);
+                            //редактировать имя/пароль
+                            if (choice3.equals("7")) {
+                                while (true) {
+                                    System.out.println("Для начала редактирования имени и пароля ведите текущие имя и пароль через разделитель /, например Vova/12345 ; либо: 1- отмена, 0- завершить работу");
+                                    String choice4 = bufferedReader.readLine();
+                                    if (choice4.equals("0")) break first;
+                                    if (choice4.equals("1")) continue third;
+                                    String split[] = choice4.split("/");
+                                    if (split.length != 2) {
+                                        System.out.println("Некорректный ввод");
+                                        continue;
+                                    }
+                                    if (split[0].trim().equals(user.getName()) && split[1].trim().equals(user.getPassword())){
 
-        userDAO.add(null);
-        userDAO.add(new User(0,null,null));
-        userDAO.remove(null);
-        userDAO.remove(Gerg);
-        userDAO.getBase().stream().forEach(System.out::println);
+                                        while (true) {
+                                            System.out.println("Введите новое имя и пароль через разделитель /, например Vova/12345 ; либо: 1- отмена, 0- завершить работу");
+                                            String choice5 = bufferedReader.readLine();
+                                            if (choice5.equals("0")) break first;
+                                            if (choice5.equals("1")) continue third;
+                                            String splitNewNameAndPass[] = choice5.split("/");
+                                            if (splitNewNameAndPass.length != 2){
+                                                System.out.println("Некорректный ввод");
+                                                continue;
+                                            }
+                                            if (Controller.editUser(new User(user.getId(), splitNewNameAndPass[0].trim(), splitNewNameAndPass[1].trim()))) {
+                                                System.out.println("Профиль успешно изменен. Ваш текущий профиль: " + user);
+                                                continue third;
+                                            }
+                                            else {
+                                                System.out.println("Что-то пошло не так! Попробуйте в другой раз.");
+                                                continue third;
+                                            }
+                                        }
+                                    }
+                                    System.out.println("Неверный логин или пароль!");
+                                    user = null;
+                                    continue first;
+                                }
+                            }
 
+                            /*поиск отеля по названию*/
+                            if (choice3.equals("2")) {
+                                while (true){
+                                    System.out.println("Введите название отеля, или его часть;" +
+                                            " получить весь список отелей- просто нажмите Enter; 9- предыдущее меню; 0- завершить работу");
+                                    String choice4 = bufferedReader.readLine();
+                                    if (choice4.equals("0")) break first;
+                                    if (choice4.equals("9")) continue third;
+                                    Controller.findHotelByName(choice4.trim()).forEach(System.out::println);
+                                    System.out.println("Продолжить поиск?");
+                                }
+                            }
 
-        System.out.println(Controller.registerUser(u));
+                            /*поиск отеля по городу*/
+                            if (choice3.equals("3")) {
+                                while (true) {
+                                    System.out.println("Введите название города, или его часть;" +
+                                            " получить весь список отелей- просто нажмите Enter; 9- предыдущее меню; 0- завершить работу");
+                                    String choice4 = bufferedReader.readLine();
+                                    if (choice4.equals("0")) break first;
+                                    if (choice4.equals("9")) continue third;
+                                    Controller.findHotelByCity(choice4.trim()).forEach(System.out::println);
+                                    System.out.println("Продолжить поиск?");
+                                }
+                            }
 
-        Hotel hotel = new Hotel(100,"gh","fgh");
-        Room room = new Room(100,500,2,hotel);
-        RoomDAO.getRoomDAO().add(room);
-        Controller.list.add(hotel);
-        System.out.println(room);
-        Controller.bookRoom(100,15454,100);
-        Controller.bookRoom(100,154,100);
-        Controller.cancelReservation(100,15454,100);
-        Controller.cancelReservation(100,154,100);
-//
-//        try {
-//            System.out.println(Controller.findHotelByName(null));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//        RoomDAO roomDAO1 = new RoomDAO();
-//        System.out.println(roomDAO1);
-//        roomDAO1.getRoomList().stream()
-//                .filter(room1 -> room1.getHotel().equals(new Hotel(1002,"Redison","Kyiv")))
-//                .forEach(System.out::println);
+                            //отмена бронирования
+                            if (choice3.equals("5")) {
+                                while (true) {
+                                    System.out.println("Забронированные Вами номера:");
+                                    List<Room> booked = Controller.bookedByUser(user);
+                                    if (booked.size() == 0 ) continue third;
+                                    booked.forEach(System.out::println);
+                                    System.out.println("\nДля снятия брони введите id номера и id отеля через разделитель /, например 5555/7777; 9- предыдущее меню; 0- завершить работу");
+                                    String choice4 = bufferedReader.readLine();
+                                    if (choice4.equals("0")) break first;
+                                    if (choice4.equals("9")) continue third;
+                                    String s[] = choice4.split("/");
+                                    if (s.length != 2) {System.out.println("Некорректный ввод id"); continue;}
+                                    try {
+                                        long roomId = Long.parseLong(s[0].trim());
+                                        long hotelId = Long.parseLong(s[1].trim());
+                                        Controller.cancelReservation(roomId, user.getId(), hotelId);
+                                    } catch (NumberFormatException e){
+                                        System.out.println("Надо вводить целые числа!");
+                                    }
+                                }
+                            }
 
-//        HotelDAO hotelDAO = HotelDAO.getHotelDAO();
-//        Hotel hoteletst = new Hotel(0, "a", "a1");
-//        hotelDAO.add(hoteletst);
- //       Hotel hotel1 = new Hotel(3, "!!b", "b!!2");
-//  //      hotelDAO.add(new Hotel(7, null, "b2"));
-//        hotelDAO.add(new Hotel(3, "c", "c3"));
-//        hotelDAO.add(new Hotel(5, "5", "c5"));
-//
-//        System.out.println();
-//        hotelDAO.getBase().stream().forEach(System.out::println);
-//        System.out.println("-----------------------------");
-//        hotelDAO.edit(null);
-   //     hotelDAO.remove(new Hotel(3, "!!b", "b!!2"));
+                            //поиск номеров
+                            if (choice3.equals("1")){
+                                second:
+                                while (true) {
+                                    System.out.println("Для поиска номеров, введите параметры разделяя их символом / в таком формате:" +
+                                            " город/название отеля/кол-во персон/цена от/цена до, образец: Kiev/Desna/2/200/350 \n" +
+                                            "если параметр Вам не важен - поставьте вместо него символ *.   А если передумали искать, то: " +
+                                            " 9- предыдущее меню; 0- завершить работу");
+                                    String choice4 = bufferedReader.readLine();
+                                    if (choice4.equals("0")) break first;
+                                    if (choice4.equals("9")) continue third;
+                                    String s[] = choice4.split("/");
+                                    if (s.length !=5) {System.out.println("Некорректный ввод!"); continue;}
+                                    Map<String,String> map = new HashMap<>();
+                                    map.put(CITY, s[0].trim());
+                                    map.put(HOTEL_NAME, s[1].trim());
+                                    map.put(PERSONS, s[2].trim());
+                                    map.put(MIN_PRICE, s[3].trim());
+                                    map.put(MAX_PRICE, s[4].trim());
+                                    List<Room> rooms = Controller.findRoom(map);
+                                    if (rooms.size() == 0) {
+                                        System.out.println("Ничего не найдено. Возможно параметры поиска слишком строгие. Повторить поиск?");
+                                        continue ;
+                                    }
+                                    rooms.forEach(System.out::println);
+                                    System.out.println();
+                                    forth:
+                                    while (true){
+                                        System.out.println("1- повторить поиск, 2- бронировать, 9- главное меню, 0- выход");
+                                        String choice5 = bufferedReader.readLine();
+                                        if (choice5.equals("0")) break first;
+                                        if (choice5.equals("9")) continue third;
+                                        if (choice5.equals("1")) break ;
+                                        if (choice5.equals("2")){
+                                            while (true) {
+                                                System.out.println("Для бронирования введите id номера и id отеля через разделитель /, например 5555/7777; 9- главное меню; 0- завершить работу");
+                                                String choice6 = bufferedReader.readLine();
+                                                if (choice6.equals("0")) break first;
+                                                if (choice6.equals("9")) continue third;
+                                                String s1[] = choice6.split("/");
+                                                if (s1.length != 2) {System.out.println("Некорректный ввод id"); continue;}
+                                                try {
+                                                    long roomId = Long.parseLong(s1[0].trim());
+                                                    long hotelId = Long.parseLong(s1[1].trim());
+                                                    if (Controller.bookRoom(roomId, user.getId(), hotelId))  continue forth;
+                                                } catch (NumberFormatException e){
+                                                    System.out.println("Надо вводить целые числа!");
+                                                }
+                                            }
 
-//        hotelDAO.getBase().stream().forEach(System.out::println);
-//        System.out.println(hoteletst.getRooms());
-//        hotelDAO.remove(hoteletst);
-//        System.out.println(hoteletst.getRooms());
-//        System.out.println(RoomDAO.getRoomDAO().getBase());
+                                        }
+                                        System.out.println("Некорректный ввод!");
 
+                                    }
+                                }
+                            }
 
-//        UserDAO userDAO = UserDAO.getUserDAO();
-//        userDAO.add(new User(10, "SL", "qwe"));
-//        System.out.println();
-//        userDAO.getBase().stream().forEach(System.out::println);
-//
-//        RoomDAO roomDAO = RoomDAO.getRoomDAO();
-//
-//        roomDAO.getBase().stream().forEach(System.out::println);
-//        System.out.println(roomDAO.getBase());
-//
-//        roomDAO.add(null);
-//        roomDAO.add(new Room(333,100,1,new Hotel(2, "b", "b2"),new User(10, "SL", "qwe")));
-//
-//
-//        System.out.println(roomDAO.getBase());
-//        roomDAO.remove(new Room(10,1500,1,hotel1));
-//        roomDAO.remove(new Room(11,100,1,new Hotel(2, "b", "b2"),new User(10, "SL", "qwe")));
-//        System.out.println(roomDAO.getBase());
-//        roomDAO.remove(null);
-//        roomDAO.remove(new Room(333,300,2,new Hotel(3, "c", "c3"),new User(10, "SL", "qwe")));
-//        roomDAO.remove(new Room(11,100,1,new Hotel(2, "b", "b2")));
-//        System.out.println(roomDAO.getBase());
-//        roomDAO.add(new Room(54,100,1,new Hotel(2, "b", "b2"),new User(10, "SL", "qwe")));
-//        HotelDAO.getHotelDAO().add(new Hotel(2, "b", "b2"));
-//        roomDAO.add(new Room(51,100,1,new Hotel(2, "b", "b2"),new User(10, "SL", "qwe")));
-//        roomDAO.edit(new Room(51,5422,1,new Hotel(2, "b", "b2"),new User(10, "SL", "qwe")));
-//        roomDAO.remove(new Room(333,100,1,new Hotel(2, "b", "b2"),new User(10, "SL", "qwe")));
-//        roomDAO.edit(null);
-// //       userDAO.edit(null);
-//        System.out.println(roomDAO.getBase());
-//
-//        System.out.println((new Hotel(2, "b", "b2")).getRooms());
-//
-//        HotelDAO.getHotelDAO().remove(new Hotel(2, "b", "b2"));
-//        roomDAO.add(new Room(54,100,1,new Hotel(2, "b", "b2"),new User(10, "SL", "qwe")));
-//        roomDAO.add(new Room(51,100,1,new Hotel(2, "b", "b2"),new User(10, "SL", "qwe")));
-//
-//
+                            System.out.println("Некорректный ввод");
+                        }
+                    }//юзер под своим именем тут заканчивается
+                }
 
+            }
+
+            //регистрация
+            if (choice1.equals("5")) {
+                while (true) {
+                    System.out.println("Регистрация. Введите имя и пароль через разделитель /, например Vova/12345 ;  либо: 1- выйти в главное меню, 0- завершить работу");
+                    String choice2 = bufferedReader.readLine();
+                    if (choice2.length() == 1) {
+                        if (choice2.equals("0")) break first;
+                        if (choice2.equals("1")) continue first;
+                    }
+                    String nameAndPass[] = choice2.split("/");
+                    if (nameAndPass.length != 2) {
+                        System.out.println("Некорректный ввод");
+                        continue;
+                    }
+                    boolean b = Controller.registerUser(new User(0, nameAndPass[0].trim(), nameAndPass[1].trim()));
+                    if (b) continue first;
+                }
+            }
+
+            System.out.println("Некорректный ввод");
+        }
+
+        System.out.println("До встречи!");
+        bufferedReader.close();
     }
 }
-

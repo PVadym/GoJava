@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
-/**
- * Created by Вадим on 22.01.2017.
- */
 public class RoomDAO implements DAO<Room> {
 
     private static RoomDAO roomDAO;
@@ -22,7 +19,6 @@ public class RoomDAO implements DAO<Room> {
         if (roomDAO == null) roomDAO = new RoomDAO();
         return roomDAO;
     }
-
 
     private RoomDAO() {
         //создаем файл для хранения комнат
@@ -40,7 +36,6 @@ public class RoomDAO implements DAO<Room> {
             if (br.readLine() == null)
                 System.out.println("База пуста комнат!");
             else {
-
                 Stream<String> streamFromFiles = Files.lines(Paths.get(file.getAbsolutePath()));
                 streamFromFiles.forEach(line -> {
                     String fields[] = line.split("@");
@@ -77,6 +72,11 @@ public class RoomDAO implements DAO<Room> {
 
     @Override
     public boolean add(Room room) {
+        if (!HotelDAO.getHotelDAO().getBase().contains(room.getHotel())) {
+            System.out.println("Отеля этой комнаты нет в базе! Сначала добавьте отель");
+            return false;
+        }
+
         try {
             if (validInspect(room)) {
                 System.out.println("Поле ID, количество мест и отель должны быть заполнены!");
@@ -94,9 +94,7 @@ public class RoomDAO implements DAO<Room> {
             System.out.println("Внесите корректную информацию о новой комнате!");
             return false;
         }
-
         return true;
-
     }
 
     @Override
@@ -110,8 +108,11 @@ public class RoomDAO implements DAO<Room> {
                 System.out.println("Поле ID, количество мест и отель должны быть заполнены!");
                 return false;
             } else {
-                remove(roomToEdit);
-                add(room);
+                roomToEdit.setPrice(room.getPrice());
+                roomToEdit.setPersons(room.getPersons());
+                roomToEdit.setHotel(room.getHotel());
+                roomToEdit.setUserReserved(room.getUserReserved());
+                writerToFile(file,roomList);
             }
         } catch (NoSuchElementException e) {
             System.out.printf("Комнаты с ID %d нет в базе." + "\n", room.getId());
@@ -122,8 +123,6 @@ public class RoomDAO implements DAO<Room> {
         }
         return true;
     }
-
-
 
     @Override
     public boolean remove(Room room) {
@@ -154,8 +153,7 @@ public class RoomDAO implements DAO<Room> {
         return notValid;
     }
 
-
-    private boolean writerToFile(File file, List<Room> list) {
+    public boolean writerToFile(File file, List<Room> list) {
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))){
             for (Room room : list) {
@@ -177,7 +175,6 @@ public class RoomDAO implements DAO<Room> {
             return false;
         }
         return true;
-
     }
 
     @Override
@@ -185,6 +182,9 @@ public class RoomDAO implements DAO<Room> {
         return roomList;
     }
 
+    public File getFile() {
+        return file;
+    }
 
     @Override
     public String toString() {
@@ -192,6 +192,4 @@ public class RoomDAO implements DAO<Room> {
                 "roomList=" + roomList +
                 '}';
     }
-
-
 }

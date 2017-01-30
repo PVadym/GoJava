@@ -82,7 +82,7 @@ public class UserDAO implements DAO<User> {
                     System.out.println("Поле имя и пароль должны быть заполнены!");
                     return false;}
                 else {
-                    if (usersBase.stream().anyMatch(u -> u.getId() == user.getId())) {
+                    if (usersBase.stream().anyMatch(u -> (u.getId() == user.getId())||u.getName().toLowerCase().equals(user.getName().toLowerCase()))) {
                         System.out.println("Пользователь уже существует!");
                         return false;
                     } else {
@@ -94,7 +94,7 @@ public class UserDAO implements DAO<User> {
                 System.out.println("Внесите корректную информацию о новом пользователе!");
                 return false;
             }
-
+            System.out.println("Пользователь добавлен в базу");
             return true;
         }
 
@@ -112,8 +112,9 @@ public class UserDAO implements DAO<User> {
                 System.out.println("Поле имя и пароль должны быть заполнены!");
                 return false;
             } else {
-                remove(userToEdit);
-                add(user);
+                userToEdit.setName(user.getName());
+                userToEdit.setPassword(user.getPassword());
+                writerToFile(file,usersBase);
             }
         } catch (NoSuchElementException e) {
             System.out.printf("Пользователя с ID %d нет в базе." + "\n", user.getId());
@@ -131,9 +132,14 @@ public class UserDAO implements DAO<User> {
     public boolean remove(User user) {
         if (usersBase.contains(user)) {
             try{
-            usersBase.remove(user);
-            writerToFile(file,usersBase);
-            return true;
+                RoomDAO roomDAO = RoomDAO.getRoomDAO();
+                roomDAO.getBase().forEach( r -> {
+                            if (r.getUserReserved() != null && r.getUserReserved().equals(user)) r.setUserReserved(null);
+                        });
+                roomDAO.writerToFile(roomDAO.getFile(),roomDAO.getBase());
+                usersBase.remove(user);
+                writerToFile(file,usersBase);
+                return true;
 
         } catch (NullPointerException e){
                 System.out.println("База пуста!");
@@ -144,7 +150,7 @@ public class UserDAO implements DAO<User> {
     }
 
     @Override
-    public List<User> getBase() {
+    public  List<User> getBase() {
         return usersBase;
     }
 

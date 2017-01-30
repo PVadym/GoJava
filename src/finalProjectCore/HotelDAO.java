@@ -8,22 +8,16 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
-/**
- * Created by Вадим on 23.01.2017.
- */
-
 public class HotelDAO implements DAO<Hotel> {
 
     private static HotelDAO hotelDAO;
     private List<Hotel> hotelList = new ArrayList<>();
     private File file;
 
-
     public static HotelDAO getHotelDAO (){
         if (hotelDAO == null) hotelDAO = new HotelDAO();
         return hotelDAO;
     }
-
 
     private HotelDAO() {
         //создаем файл для хранения отелей
@@ -49,11 +43,7 @@ public class HotelDAO implements DAO<Hotel> {
         } catch (IOException | NumberFormatException e) {
             throw new RuntimeException("База отелей повреждена");
         }
-
     }
-
-
-
 
     @Override
     public boolean add(Hotel hotel) {
@@ -66,10 +56,15 @@ public class HotelDAO implements DAO<Hotel> {
                 if (hotelList.stream().anyMatch(hotelFromBase -> hotelFromBase.getId() == hotel.getId()))  {
                     System.out.println("Отель с таким ID уже существует!");
                     return false;
-                } else {
-                    hotelList.add(hotel);
-                    writerToFile(file,hotelList);
                 }
+                if (hotelList.stream().anyMatch(hotel1 ->
+                        ( hotel1.getCity().toLowerCase().trim().equals(hotel.getCity().toLowerCase().trim())
+                                && hotel1.getName().trim().toLowerCase().equals(hotel.getName().trim().toLowerCase())))){
+                    System.out.println("Мы добавляем отель, но хотим обратить Ваше внимание, в базе уже был отель в этом " +
+                            "городе именем!");
+                }
+                hotelList.add(hotel);
+                writerToFile(file,hotelList);
             }
         } catch (NullPointerException e) {
             System.out.println("Внесите корректную информацию о новой комнате!");
@@ -78,10 +73,8 @@ public class HotelDAO implements DAO<Hotel> {
         return true;
     }
 
-
     @Override
     public boolean edit(Hotel hotel) {
-
 
         try {
             if (validInspect(hotel)) {
@@ -118,8 +111,6 @@ public class HotelDAO implements DAO<Hotel> {
                         .anyMatch(h -> h.getId() == hotel.getId())) {
 
                     RoomDAO roomDAO = RoomDAO.getRoomDAO();
-//                    roomDAO.getBase().stream().filter(room -> room.getHotel().getId()==hotel.getId()).
-//                            ifPresent(roomDAO.remove());
                     for (int i = roomDAO.getBase().size()-1; i >=0 ; i--) {
                         if (roomDAO.getBase().get(i).getHotel().getId()==hotel.getId()) {
                             roomDAO.remove(roomDAO.getBase().get(i));
@@ -134,23 +125,6 @@ public class HotelDAO implements DAO<Hotel> {
             }
             return true;
         }
-
-
-
-//
-//        if (!hotelList.contains(hotel)){
-//            System.out.println("Отель не найден");
-//            return false; }
-//
-//        RoomDAO roomDAO = RoomDAO.getRoomDAO();
-//        for (int i = 0; i < roomDAO.getBase().size(); i++) {
-//            if (roomDAO.getBase().get(i).getHotel().equals(hotel)) {
-//                roomDAO.remove(roomDAO.getBase().get(i));
-//            }
-//        }
-//        hotelList.remove(hotel);
-//        writerToFile(file,hotelList);
-//        return true;
 
     }
     // проверка на валидность
@@ -178,13 +152,11 @@ public class HotelDAO implements DAO<Hotel> {
             return false;
         }
         return true;
-
     }
 
     @Override
     public List<Hotel> getBase() {
         return hotelList;
     }
-
 
 }

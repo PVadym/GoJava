@@ -9,6 +9,4 @@ public interface DAO <T> {
      boolean edit(T t);
      boolean remove(T t);
      List<T> getBase();
-
-
 }
