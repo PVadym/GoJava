@@ -13,14 +13,16 @@ public class Controller {
     public static final String MIN_PRICE = "minPrice";
 
     //Поиск зарезервированных юзером номеров
-    public static List<Room> bookedByUser (User user){
-        List<Room> list = RoomDAO.getRoomDAO().getBase().stream().filter(room -> room.getUserReserved() != null). filter(room -> room.getUserReserved().equals(user)).collect(Collectors.toList());
+    public List<Room> bookedByUser (User user){
+        List<Room> list = RoomDAO.getRoomDAO().getBase().stream().filter(room ->
+                room.getUserReserved() != null). filter(room ->
+                room.getUserReserved().equals(user)).collect(Collectors.toList());
         if (list.size() == 0) System.out.println("забронированных номеров не найдено");
         return list;
     }
 
     //Регистрация юзера в базе
-    public static boolean registerUser(User newUser) {
+    public boolean registerUser(User newUser) {
         long id;
         if (UserDAO.getUserDAO().getBase().size() != 0) {
             User userWithTheBigestId = UserDAO.getUserDAO().getBase().stream().max((u1, u2) ->
@@ -34,14 +36,15 @@ public class Controller {
     }
 
     //Вход в систему для юзера
-    public static User enter (String name, String pass){
+    public User enter (String name, String pass){
         if (UserDAO.getUserDAO().getBase().size() == 0) {
             System.out.println("Пользователь не найден.");
             return null;
         }
         User user = null;
         try {
-            user = UserDAO.getUserDAO().getBase().stream().filter(u -> (u.getName().toLowerCase().equals(name))&& u.getPassword().equals(pass) ).findAny().get();
+            user = UserDAO.getUserDAO().getBase().stream().filter(u ->
+                    (u.getName().toLowerCase().equals(name))&& u.getPassword().equals(pass) ).findAny().get();
         } catch (Exception e) {
             System.out.println("Не верное имя пользователя, либо пароль");
             return null;
@@ -50,21 +53,21 @@ public class Controller {
         return user;
     }
 
-   public static List<Hotel> findHotelByName(String name) {
+   public List<Hotel> findHotelByName(String name) {
        List<Hotel> list = HotelDAO.getHotelDAO().getBase().stream()
-               .filter(hotel -> hotel.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
+              .filter(hotel -> hotel.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
        if(list.size() == 0) System.out.println("Отели не найдены");
        return list;
     }
 
-    public static List<Hotel> findHotelByCity(String city){
+    public List<Hotel> findHotelByCity(String city){
         List<Hotel> list = HotelDAO.getHotelDAO().getBase().stream().
-                filter(hotel -> hotel.getCity().toLowerCase().contains(city.toLowerCase())).collect(Collectors.toList());
+               filter(hotel -> hotel.getCity().toLowerCase().contains(city.toLowerCase())).collect(Collectors.toList());
         if(list.size() == 0) System.out.println("Отели не найдены");
         return list;
     }
 
-    public static boolean bookRoom(long roomId, long userId, long hotelId) {
+    public boolean bookRoom(long roomId, long userId, long hotelId) {
         try {
             User userToRegister = UserDAO.getUserDAO().getBase().stream()
                     .filter(user -> user.getId() == userId)
@@ -104,7 +107,7 @@ public class Controller {
         return false;
     }
 
-    public static boolean cancelReservation(long roomId, long userId, long hotelId) {
+    public boolean cancelReservation(long roomId, long userId, long hotelId) {
         try {
             User userToRegister = UserDAO.getUserDAO().getBase().stream()
                     .filter(user -> user.getId() == userId)
@@ -121,7 +124,8 @@ public class Controller {
                             .findAny()
                             .get();
 
-                    if ((roomToReservation.getUserReserved() != null)  && (userToRegister.equals(roomToReservation.getUserReserved()) )) {
+                    if ((roomToReservation.getUserReserved() != null) &&
+                            (userToRegister.equals(roomToReservation.getUserReserved()) )) {
                         roomToReservation.setUserReserved(null);
                         System.out.printf("Резерв пользователя %s с комнаты %s снят.\n",
                                 userToRegister.toString(),roomToReservation.toString());
@@ -144,8 +148,9 @@ public class Controller {
         return false;
     }
 
-    public static List<Room> findRoom(Map <String,String> params){
-        List<Room> rooms = RoomDAO.getRoomDAO().getBase().stream().filter(room -> room.getUserReserved() == null).collect(Collectors.toList());
+    public List<Room> findRoom(Map <String,String> params){
+        List<Room> rooms = RoomDAO.getRoomDAO().getBase().stream().filter(room ->
+                room.getUserReserved() == null).collect(Collectors.toList());
         String city = params.get(CITY);
         String hotelName = params.get(HOTEL_NAME);
         String personsString = params.get(PERSONS);
@@ -193,11 +198,11 @@ public class Controller {
                 .collect(Collectors.toList());
     }
 
-    public static boolean editUser (User user){
+    public boolean editUser (User user){
         return UserDAO.getUserDAO().edit(user);
     }
 
-    public static User findUserById (long id){
+    public User findUserById (long id){
         User user = null;
         try {
             user = UserDAO.getUserDAO().getBase().stream().filter(user1 -> user1.getId() == id).findAny().get();
@@ -205,19 +210,19 @@ public class Controller {
         return user;
     }
 
-    public static boolean removeUser (User user){
+    public boolean removeUser (User user){
         return UserDAO.getUserDAO().remove(user);
     }
 
-    public static boolean removeHotel (Hotel hotel){
+    public boolean removeHotel (Hotel hotel){
         return HotelDAO.getHotelDAO().remove(hotel);
     }
 
-    public static boolean removeRoom (Room room){
+    public boolean removeRoom (Room room){
         return RoomDAO.getRoomDAO().remove(room);
     }
 
-    public static Room findRoomById (long id){
+    public Room findRoomById (long id){
         Room room = null;
         try {
             room = RoomDAO.getRoomDAO().getBase().stream().filter(room1 -> room1.getId() == id).findAny().get();
@@ -225,17 +230,17 @@ public class Controller {
         return room;
     }
 
-    public static Hotel editHotel (Hotel hotel){
+    public Hotel editHotel (Hotel hotel){
         if (HotelDAO.getHotelDAO().edit(hotel)) return hotel;
         return null;
     }
 
-    public static Room editRoom (Room room){
+    public Room editRoom (Room room){
         if (RoomDAO.getRoomDAO().edit(room)) return room;
         return null;
 
     }
-    public static Hotel addHotel (Hotel hotel){
+    public Hotel addHotel (Hotel hotel){
         long id;
         if (HotelDAO.getHotelDAO().getBase().size() != 0) {
             Hotel hotelWithTheBiggestId = HotelDAO.getHotelDAO().getBase().stream().max((r1, r2) ->
@@ -249,7 +254,7 @@ public class Controller {
         return null;
     }
 
-    public static Room addRoom (Room room) {
+    public Room addRoom (Room room) {
         long id;
         if (RoomDAO.getRoomDAO().getBase().size() != 0) {
             Room roomWithTheBiggestId = RoomDAO.getRoomDAO().getBase().stream().max((r1, r2) ->
@@ -257,12 +262,12 @@ public class Controller {
             id = roomWithTheBiggestId.getId() + 1;
         }
         else id = 300;
-        room = new Room(id, room.getPrice(), room.getPersons(),room.getHotel(),room.getUserReserved());// надо ли поле room.getUserReserved()?
+        room = new Room(id, room.getPrice(), room.getPersons(),room.getHotel(),room.getUserReserved());
         if (RoomDAO.getRoomDAO().add(room)) return room;
         return null;
     }
 
-    public static Hotel findHotelById (long id){
+    public Hotel findHotelById (long id){
         Hotel hotel = null;
         try {
             hotel = HotelDAO.getHotelDAO().getBase().stream()
@@ -273,11 +278,14 @@ public class Controller {
         return hotel;
     }
 
-    public static List<User> findUsersByName (String name){
-        List <User> list = UserDAO.getUserDAO().getBase().stream()
-                .filter(user -> user.getName().toLowerCase().contains(name.toLowerCase()))
-                .collect(Collectors.toList());
+    public List<User> findUsersByName (String name){
+        List <User> list = UserDAO.getUserDAO().getBase().stream().filter(user ->
+                user.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
         if (list.size() == 0) System.out.println("Подходящие пользователи не найдены!");
         return list;
+    }
+    public List<Room> booked () {
+        return RoomDAO.getRoomDAO().getBase().stream().filter(user ->
+                user.getUserReserved() != null).collect(Collectors.toList());
     }
 }

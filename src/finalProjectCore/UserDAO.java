@@ -82,7 +82,8 @@ public class UserDAO implements DAO<User> {
                     System.out.println("Поле имя и пароль должны быть заполнены!");
                     return false;}
                 else {
-                    if (usersBase.stream().anyMatch(u -> (u.getId() == user.getId())||u.getName().toLowerCase().equals(user.getName().toLowerCase()))) {
+                    if (usersBase.stream().anyMatch(u -> (u.getId() ==
+                            user.getId())||u.getName().toLowerCase().equals(user.getName().toLowerCase()))) {
                         System.out.println("Пользователь уже существует!");
                         return false;
                     } else {

@@ -35,7 +35,8 @@ public class HotelDAO implements DAO<Hotel> {
             streamFromFiles.forEach(line -> {
                 String fields[] = line.split("@");
                 if (fields.length != 3) throw new RuntimeException("База отелей повреждена");
-                if (hotelList.stream().anyMatch(hotel -> hotel.getId() == Long.parseLong(fields[0]))) throw new RuntimeException("База отелей повреждена");
+                if (hotelList.stream().anyMatch(hotel -> hotel.getId() ==
+                        Long.parseLong(fields[0]))) throw new RuntimeException("База отелей повреждена");
                 hotelList.add(new Hotel(Long.parseLong(fields[0]), fields[1], fields[2]));
 
             });
@@ -59,9 +60,10 @@ public class HotelDAO implements DAO<Hotel> {
                 }
                 if (hotelList.stream().anyMatch(hotel1 ->
                         ( hotel1.getCity().toLowerCase().trim().equals(hotel.getCity().toLowerCase().trim())
-                                && hotel1.getName().trim().toLowerCase().equals(hotel.getName().trim().toLowerCase())))){
-                    System.out.println("Мы добавляем отель, но хотим обратить Ваше внимание, в базе уже был отель в этом " +
-                            "городе именем!");
+                               && hotel1.getName().trim().toLowerCase().equals(hotel.getName().trim().toLowerCase())))){
+                    System.out.println("Мы добавляем отель, но хотим обратить Ваше внимание, " +
+                            "в базе уже был отель в этом городе именем!");
+
                 }
                 hotelList.add(hotel);
                 writerToFile(file,hotelList);

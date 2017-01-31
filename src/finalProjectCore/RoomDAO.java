@@ -59,7 +59,8 @@ public class RoomDAO implements DAO<Room> {
                         }
                     }
                     if (hotel != null) {
-                        roomList.add(new Room(Long.parseLong(fields[0]), Integer.parseInt(fields[1]), Integer.parseInt(fields[2]), hotel, user));
+                        roomList.add(new Room(Long.parseLong(fields[0]), Integer.parseInt(fields[1]),
+                                Integer.parseInt(fields[2]), hotel, user));
                     }
                 });
                 streamFromFiles.close();
